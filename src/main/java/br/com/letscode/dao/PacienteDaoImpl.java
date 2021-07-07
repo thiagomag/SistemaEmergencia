@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 public class PacienteDaoImpl implements PacienteDao {
 
-    private final String caminho = "dados/pacientes";
+    private final String caminho = "pacientes.csv";
 
     public final Path path = Paths.get(caminho);
 

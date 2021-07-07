@@ -6,6 +6,7 @@ import br.com.letscode.service.PacienteService;
 import jakarta.inject.Inject;
 
 import java.io.IOException;
+import java.util.Optional;
 import java.util.UUID;
 
 public class PacienteServiceImpl implements PacienteService {
@@ -21,8 +22,7 @@ public class PacienteServiceImpl implements PacienteService {
     }
 
     @Override
-    public Paciente consultaPaciente(String cpf) {
-        return null;
+    public Optional<Paciente> consultaPaciente(String cpf) throws IOException {
+        return pacienteDao.findByCpf(cpf).stream().filter(paciente1 -> paciente1.getCpf().equals(cpf)).findFirst();
     }
-
 }

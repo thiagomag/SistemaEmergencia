@@ -16,5 +16,5 @@ public class Paciente {
     private String identificador;
     private String nome;
     private String cpf;
-    private List<Medicamento> medicamentos;
+
 }

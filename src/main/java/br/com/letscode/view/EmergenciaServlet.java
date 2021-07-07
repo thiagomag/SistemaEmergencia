@@ -75,13 +75,13 @@ public class EmergenciaServlet extends HttpServlet {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         if(cpfPesquisa != null) {
-            Optional<Paciente> optionalPaciente = pacientes.stream().filter(paciente -> paciente.getCpf().equals(cpfPesquisa)).findFirst();
+            Optional<Paciente> optionalPaciente = pacienteService.consultaPaciente(cpfPesquisa);
             if (optionalPaciente.isPresent()) {
                 printWriter.write(gson.toJson(optionalPaciente.get()));
             } else {
                 CustomMessage message = CustomMessage.builder()
                         .status(404)
-                        .message("Conteudo não encontrado")
+                        .message("Conteúdo não encontrado")
                         .build();
                 response.setStatus(404);
                 printWriter.write(gson.toJson(message));
