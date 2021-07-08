@@ -8,7 +8,6 @@ import jakarta.inject.Inject;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 public class MedicamentoServiceImpl implements MedicamentoService {
@@ -18,7 +17,7 @@ public class MedicamentoServiceImpl implements MedicamentoService {
 
     @Override
     public Medicamento inserirMedicamento(Medicamento medicamento) throws IOException {
-        if(emergenciaDao.findByName(medicamento.getPrincipioAtivo()).isPresent() && emergenciaDao.findByCpf(medicamento.getPaciente().getCpf()).isPresent()) {
+        if(emergenciaDao.findByName(medicamento.getPrincipioAtivo()).isPresent() && emergenciaDao.findFirstByCpf(medicamento.getPaciente().getCpf()).isPresent()) {
             throw new PacienteJaExisteException("Medicamento com o principio ativo " + medicamento.getPrincipioAtivo() + " já existe no sistema associado ao paciente " + medicamento.getPaciente().getNome() + ".");
         }
         medicamento.setIdentificador(UUID.randomUUID().toString());
@@ -31,8 +30,8 @@ public class MedicamentoServiceImpl implements MedicamentoService {
     }
 
     @Override
-    public Optional<Medicamento> consultaMedicamento(String principioAtivo) throws IOException {
-        return emergenciaDao.findByName(principioAtivo);
+    public List<Medicamento> consultaMedicamento(String principioAtivo) throws IOException {
+        return emergenciaDao.findByPrincipioAtivo(principioAtivo);
     }
 
     @Override

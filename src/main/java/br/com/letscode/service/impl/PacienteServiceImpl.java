@@ -6,7 +6,7 @@ import br.com.letscode.service.PacienteService;
 import jakarta.inject.Inject;
 
 import java.io.IOException;
-import java.util.Optional;
+import java.util.List;
 
 public class PacienteServiceImpl implements PacienteService {
 
@@ -14,7 +14,7 @@ public class PacienteServiceImpl implements PacienteService {
     private EmergenciaDao emergenciaDao;
 
     @Override
-    public Optional<Medicamento> consultaPaciente(String cpf) throws IOException {
+    public List<Medicamento> consultaPaciente(String cpf) throws IOException {
         return emergenciaDao.findByCpf(cpf);
     }
 

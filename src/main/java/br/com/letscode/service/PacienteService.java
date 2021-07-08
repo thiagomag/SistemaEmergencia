@@ -3,9 +3,9 @@ package br.com.letscode.service;
 import br.com.letscode.dominio.Medicamento;
 
 import java.io.IOException;
-import java.util.Optional;
+import java.util.List;
 
 public interface PacienteService {
 
-    Optional<Medicamento> consultaPaciente(String cpf) throws IOException;
+    List<Medicamento> consultaPaciente(String cpf) throws IOException;
 }

@@ -78,7 +78,6 @@ public class EmergenciaServlet extends HttpServlet {
         BufferedReader br = request.getReader();
         String line;
         StringBuilder conteudo = new StringBuilder();
-
         while (null != (line = br.readLine())) {
             conteudo.append(line);
         }
@@ -88,7 +87,7 @@ public class EmergenciaServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         final String cpfPesquisa = request.getParameter("cpf");
-        final String nomePesquisa = request.getParameter("Principio Ativo");
+        final String nomePesquisa = request.getParameter("principioAtivo");
         HttpSession session = request.getSession();
         List<Medicamento> medicamentos = new ArrayList<>();
         if (Objects.nonNull(session.getAttribute(MEDICAMENTOS_SESSION))) {
@@ -98,16 +97,16 @@ public class EmergenciaServlet extends HttpServlet {
         }
         PrintWriter printWriter = prepareResponse(response);
         if (cpfPesquisa != null) {
-            Optional<Medicamento> optionalPaciente = pacienteService.consultaPaciente(cpfPesquisa);
-            if (optionalPaciente.isPresent()) {
-                printWriter.write(gson.toJson(optionalPaciente.get()));
+            List<Medicamento> optionalPaciente = pacienteService.consultaPaciente(cpfPesquisa);
+            if (optionalPaciente != null) {
+                printWriter.write(gson.toJson(optionalPaciente));
             } else {
                 naoEncontradoMessage(response, printWriter);
             }
         } else if (nomePesquisa != null) {
-            Optional<Medicamento> optionalMedicamento = medicamentoService.consultaMedicamento(nomePesquisa);
-            if (optionalMedicamento.isPresent()) {
-                printWriter.write(gson.toJson(optionalMedicamento.get()));
+            List<Medicamento> medicamentosPesquisados = medicamentoService.consultaMedicamento(nomePesquisa);
+            if (medicamentosPesquisados != null) {
+                printWriter.write(gson.toJson(medicamentosPesquisados));
             } else {
                 naoEncontradoMessage(response, printWriter);
             }

@@ -27,7 +27,7 @@ public class EmergenciaDaoImpl implements EmergenciaDao {
     @PostConstruct
     public void init() {
         try {
-            path = Paths.get("medicamentos.csv");
+            path = Paths.get("C:\\Users\\thiag\\IdeaProjects\\SistemaEmergencia\\medicamentos.csv");
             if (!path.toFile().exists()) {
                 Files.createFile(path);
             }
@@ -59,9 +59,15 @@ public class EmergenciaDaoImpl implements EmergenciaDao {
     }
 
     @Override
-    public Optional<Medicamento> findByCpf(String cpf) throws IOException {
+    public Optional<Medicamento> findFirstByCpf(String cpf) throws IOException {
         List<Medicamento> medicamentos = getAll();
         return  medicamentos.stream().filter(medicamento -> medicamento.getPaciente().getCpf().equals(cpf)).findFirst();
+    }
+
+    @Override
+    public List<Medicamento> findByCpf(String cpf) throws IOException {
+        List<Medicamento> medicamentos = getAll();
+        return  medicamentos.stream().filter(medicamento -> medicamento.getPaciente().getCpf().equals(cpf)).collect(Collectors.toList());
     }
 
     @Override
@@ -71,6 +77,12 @@ public class EmergenciaDaoImpl implements EmergenciaDao {
     }
 
     @Override
+    public List<Medicamento> findByPrincipioAtivo(String principioAtivo) throws IOException {
+        List<Medicamento> medicamentos = getAll();
+        return medicamentos.stream().filter(medicamento -> medicamento.getPrincipioAtivo().equals(principioAtivo)).collect(Collectors.toList());
+    }
+
+        @Override
     public Medicamento alterarArquivo(Medicamento medicamento, String identificador) throws IOException {
         List<Medicamento> medicamentos = getAll();
         Optional<Medicamento> optionalPaciente = medicamentos.stream()
@@ -105,7 +117,7 @@ public class EmergenciaDaoImpl implements EmergenciaDao {
     }
 
     private String format(Medicamento medicamento) {
-        return String.format("%s;%s;%s;%d;%d;%s;%s;%s \r\n",
+        return String.format("%s;%s;%s;%d;%d;%s;%s;%s\r\n",
                 medicamento.getIdentificador(),
                 medicamento.getPrincipioAtivo(),
                 medicamento.getFabricante(),
