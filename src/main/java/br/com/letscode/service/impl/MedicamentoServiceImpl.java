@@ -18,7 +18,7 @@ public class MedicamentoServiceImpl implements MedicamentoService {
 
     @Override
     public Medicamento inserirMedicamento(Medicamento medicamento) throws IOException {
-        if(emergenciaDao.findByName(medicamento.getPrincipioAtivo()).isPresent()) {
+        if(emergenciaDao.findByName(medicamento.getPrincipioAtivo()).isPresent() && emergenciaDao.findByCpf(medicamento.getPaciente().getCpf()).isPresent()) {
             throw new PacienteJaExisteException("Medicamento com o principio ativo " + medicamento.getPrincipioAtivo() + " já existe no sistema.");
         }
         medicamento.setIdentificador(UUID.randomUUID().toString());
