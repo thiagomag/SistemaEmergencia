@@ -11,4 +11,6 @@ public interface PacienteDao {
     Paciente inserirArquivo(Paciente paciente) throws IOException;
     List<Paciente> getAll() throws IOException;
     Optional<Paciente> findByCpf(String cpf) throws IOException;
+    Paciente alterarArquivo(Paciente paciente, String identificador) throws IOException;
+    void removerItemArquivo(String identificador) throws IOException;
 }
