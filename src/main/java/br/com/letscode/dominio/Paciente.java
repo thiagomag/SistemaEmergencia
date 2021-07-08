@@ -13,7 +13,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class Paciente {
 
-    private String identificador = UUID.randomUUID().toString();
+
     private String nome;
     private String cpf;
 }

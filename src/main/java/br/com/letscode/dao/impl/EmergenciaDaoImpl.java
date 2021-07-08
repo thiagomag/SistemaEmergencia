@@ -117,13 +117,12 @@ public class EmergenciaDaoImpl implements EmergenciaDao {
     }
 
     private String format(Medicamento medicamento) {
-        return String.format("%s;%s;%s;%d;%d;%s;%s;%s\r\n",
+        return String.format("%s;%s;%s;%d;%d;%s;%s\r\n",
                 medicamento.getIdentificador(),
                 medicamento.getPrincipioAtivo(),
                 medicamento.getFabricante(),
                 medicamento.getDosagem(),
                 medicamento.getPeriodicidade(),
-                medicamento.getPaciente().getIdentificador(),
                 medicamento.getPaciente().getNome(),
                 medicamento.getPaciente().getCpf());
     }
@@ -137,7 +136,6 @@ public class EmergenciaDaoImpl implements EmergenciaDao {
                 .dosagem(Integer.parseInt(token.nextToken()))
                 .periodicidade(Integer.parseInt(token.nextToken()))
                 .paciente(Paciente.builder()
-                        .identificador(token.nextToken())
                         .nome(token.nextToken())
                         .cpf(token.nextToken())
                         .build())
