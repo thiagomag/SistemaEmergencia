@@ -1,8 +1,9 @@
 package br.com.letscode.view;
 
 import br.com.letscode.dominio.CustomMessage;
-import br.com.letscode.dominio.Paciente;
+import br.com.letscode.dominio.Medicamento;
 import br.com.letscode.excecoes.PacienteJaExisteException;
+import br.com.letscode.service.MedicamentoService;
 import br.com.letscode.service.PacienteService;
 import com.google.gson.Gson;
 import jakarta.inject.Inject;
@@ -21,10 +22,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-@WebServlet(name = "EmergenciaServlet", urlPatterns = "/pacientes")
-public class PacienteServlet extends HttpServlet {
+@WebServlet(name = "EmergenciaServlet", urlPatterns = "/emergencia")
+public class EmergenciaServlet extends HttpServlet {
 
-    public static final String PACIENTES_SESSION = "pacientes";
+    public static final String MEDICAMENTOS_SESSION = "medicamentos";
+
+    @Inject
+    private MedicamentoService medicamentoService;
 
     @Inject
     private PacienteService pacienteService;
@@ -40,20 +44,20 @@ public class PacienteServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         StringBuilder conteudo = getBody(request);
-        Paciente pacienteRequest = gson.fromJson(conteudo.toString(), Paciente.class);
+        Medicamento medicamentoRequest = gson.fromJson(conteudo.toString(), Medicamento.class);
         PrintWriter print = prepareResponse(response);
         String resposta;
-        if (pacienteRequest.getNome() == null || pacienteRequest.getCpf() == null) {
+        if (medicamentoRequest.getPaciente().getNome() == null || medicamentoRequest.getPaciente().getCpf() == null) {
             CustomMessage message = new CustomMessage(HttpServletResponse.SC_BAD_REQUEST, "Invalid Parameter");
             response.setStatus(message.getStatus());
             resposta = gson.toJson(message);
         } else {
             try {
                 HttpSession session = request.getSession(true);
-                pacienteService.inserirPaciente(pacienteRequest);
-                List<Paciente> pacientes = pacienteService.listAll();
-                session.setAttribute(PACIENTES_SESSION, pacientes);
-                resposta = gson.toJson(pacientes);
+                medicamentoService.inserirMedicamento(medicamentoRequest);
+                List<Medicamento> medicamentos = medicamentoService.listAll();
+                session.setAttribute(MEDICAMENTOS_SESSION, medicamentos);
+                resposta = gson.toJson(medicamentos);
 
             } catch (PacienteJaExisteException pacienteJaExisteException) {
                 response.setStatus(400);
@@ -72,7 +76,7 @@ public class PacienteServlet extends HttpServlet {
 
     private StringBuilder getBody(HttpServletRequest request) throws IOException {
         BufferedReader br = request.getReader();
-        String line = "";
+        String line;
         StringBuilder conteudo = new StringBuilder();
 
         while (null != (line = br.readLine())) {
@@ -84,61 +88,73 @@ public class PacienteServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         final String cpfPesquisa = request.getParameter("cpf");
+        final String nomePesquisa = request.getParameter("Principio Ativo");
         HttpSession session = request.getSession();
-        List<Paciente> pacientes = new ArrayList<>();
-        if (Objects.nonNull(session.getAttribute(PACIENTES_SESSION))) {
-            pacientes.addAll((List<Paciente>) session.getAttribute(PACIENTES_SESSION));
+        List<Medicamento> medicamentos = new ArrayList<>();
+        if (Objects.nonNull(session.getAttribute(MEDICAMENTOS_SESSION))) {
+            medicamentos.addAll((List<Medicamento>) session.getAttribute(MEDICAMENTOS_SESSION));
         } else {
-            pacientes.addAll(pacienteService.listAll());
+            medicamentos.addAll(medicamentoService.listAll());
         }
         PrintWriter printWriter = prepareResponse(response);
         if (cpfPesquisa != null) {
-            Optional<Paciente> optionalPaciente = pacienteService.consultaPaciente(cpfPesquisa);
+            Optional<Medicamento> optionalPaciente = pacienteService.consultaPaciente(cpfPesquisa);
             if (optionalPaciente.isPresent()) {
                 printWriter.write(gson.toJson(optionalPaciente.get()));
             } else {
-                CustomMessage message = CustomMessage.builder()
-                        .status(404)
-                        .message("Conteúdo não encontrado")
-                        .build();
-                response.setStatus(404);
-                printWriter.write(gson.toJson(message));
+                naoEncontradoMessage(response, printWriter);
+            }
+        } else if (nomePesquisa != null) {
+            Optional<Medicamento> optionalMedicamento = medicamentoService.consultaMedicamento(nomePesquisa);
+            if (optionalMedicamento.isPresent()) {
+                printWriter.write(gson.toJson(optionalMedicamento.get()));
+            } else {
+                naoEncontradoMessage(response, printWriter);
             }
         } else {
-            printWriter.write(gson.toJson(pacientes));
+            printWriter.write(gson.toJson(medicamentos));
         }
         printWriter.close();
     }
 
+    private void naoEncontradoMessage(HttpServletResponse response, PrintWriter printWriter) {
+        CustomMessage message = CustomMessage.builder()
+                .status(404)
+                .message("Conteúdo não encontrado")
+                .build();
+        response.setStatus(404);
+        printWriter.write(gson.toJson(message));
+    }
+
     @Override
-    protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException {
         StringBuilder conteudo = getBody(request);
         String identificador = request.getParameter("identificador");
 
         PrintWriter printWriter = prepareResponse(response);
-        String resposta = "";
+        String resposta;
         if (Objects.isNull(identificador)) {
             resposta = erroMessage(response);
         } else {
-            Paciente paciente = gson.fromJson(conteudo.toString(), Paciente.class);
-            resposta = gson.toJson(pacienteService.alterar(paciente, identificador));
-            request.getSession().setAttribute(PACIENTES_SESSION,pacienteService.listAll());
+            Medicamento medicamento = gson.fromJson(conteudo.toString(), Medicamento.class);
+            resposta = gson.toJson(medicamentoService.alterar(medicamento, identificador));
+            request.getSession().setAttribute(MEDICAMENTOS_SESSION, medicamentoService.listAll());
         }
         printWriter.write(resposta);
         printWriter.close();
     }
 
     @Override
-    protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String identificador = request.getParameter("identificador");
         PrintWriter printWriter = prepareResponse(response);
         String resposta;
         if(Objects.isNull(identificador)){
             resposta = erroMessage(response);
         }else {
-            pacienteService.remover(identificador);
+            medicamentoService.remover(identificador);
             resposta = gson.toJson(new CustomMessage(204, "cliente removido"));
-            request.getSession().setAttribute(PACIENTES_SESSION, pacienteService.listAll());
+            request.getSession().setAttribute(MEDICAMENTOS_SESSION, medicamentoService.listAll());
         }
         printWriter.write(resposta);
         printWriter.close();

@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
+import java.util.UUID;
 
 @Builder
 @Data
@@ -13,8 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 public class Paciente {
 
-    private String identificador;
+    private String identificador = UUID.randomUUID().toString();
     private String nome;
     private String cpf;
-    private List<Medicamento> medicamentos;
 }

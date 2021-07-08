@@ -11,8 +11,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Medicamento {
 
+    private String identificador;
     private String principioAtivo;
     private String fabricante;
     private int dosagem;
     private int periodicidade;
+    private Paciente paciente;
 }
