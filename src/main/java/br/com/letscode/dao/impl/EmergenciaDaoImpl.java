@@ -25,18 +25,16 @@ import java.util.stream.Collectors;
 
 public class EmergenciaDaoImpl implements EmergenciaDao {
 
-    private final String caminho = "/arquivosLogicos"+ File.separator+"medicamentos.csv";
-
     private Path path;
 
     @PostConstruct
     public void init() {
         try {
-            path = Paths.get(Objects.requireNonNull(getClass().getResource(caminho)).toURI());
+            path = Paths.get("C:\\Users\\thiag\\IdeaProjects\\medicamentos.csv");
             if (!path.toFile().exists()) {
                 Files.createFile(path);
             }
-        } catch (IOException | URISyntaxException ioException) {
+        } catch (IOException ioException) {
             ioException.printStackTrace();
         }
     }
