@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -38,12 +39,13 @@ public class EmergenciaDaoImpl implements EmergenciaDao {
 
     @Override
     public Medicamento inserirArquivo(Medicamento medicamento) throws IOException {
+        System.out.println(medicamento.getHorarioDose());
         write(format(medicamento), StandardOpenOption.APPEND);
         return medicamento;
     }
 
     private void write(String clienteStr, StandardOpenOption option) throws IOException {
-        try(BufferedWriter bf = Files.newBufferedWriter(path, option)){
+        try (BufferedWriter bf = Files.newBufferedWriter(path, option)) {
             bf.flush();
             bf.write(clienteStr);
         }
@@ -58,22 +60,23 @@ public class EmergenciaDaoImpl implements EmergenciaDao {
         return medicamentos;
     }
 
+
     @Override
     public Optional<Medicamento> findFirstByCpf(String cpf) throws IOException {
         List<Medicamento> medicamentos = getAll();
-        return  medicamentos.stream().filter(medicamento -> medicamento.getPaciente().getCpf().equals(cpf)).findFirst();
+        return medicamentos.stream().filter(medicamento -> medicamento.getPaciente().getCpf().equals(cpf)).findFirst();
     }
 
     @Override
     public List<Medicamento> findByCpf(String cpf) throws IOException {
         List<Medicamento> medicamentos = getAll();
-        return  medicamentos.stream().filter(medicamento -> medicamento.getPaciente().getCpf().equals(cpf)).collect(Collectors.toList());
+        return medicamentos.stream().filter(medicamento -> medicamento.getPaciente().getCpf().equals(cpf)).collect(Collectors.toList());
     }
 
     @Override
     public Optional<Medicamento> findByName(String principioAtivo) throws IOException {
         List<Medicamento> medicamentos = getAll();
-        return  medicamentos.stream().filter(medicamento -> medicamento.getPrincipioAtivo().equals(principioAtivo)).findFirst();
+        return medicamentos.stream().filter(medicamento -> medicamento.getPrincipioAtivo().equals(principioAtivo)).findFirst();
     }
 
     @Override
@@ -82,12 +85,12 @@ public class EmergenciaDaoImpl implements EmergenciaDao {
         return medicamentos.stream().filter(medicamento -> medicamento.getPrincipioAtivo().equals(principioAtivo)).collect(Collectors.toList());
     }
 
-        @Override
+    @Override
     public Medicamento alterarArquivo(Medicamento medicamento, String identificador) throws IOException {
         List<Medicamento> medicamentos = getAll();
         Optional<Medicamento> optionalPaciente = medicamentos.stream()
                 .filter(pacienteSearch -> pacienteSearch.getIdentificador().equals(identificador)).findFirst();
-        if(optionalPaciente.isPresent()) {
+        if (optionalPaciente.isPresent()) {
             optionalPaciente.get().setPrincipioAtivo(medicamento.getPrincipioAtivo());
             reescreverArquivo(medicamentos);
             return optionalPaciente.get();
@@ -97,7 +100,7 @@ public class EmergenciaDaoImpl implements EmergenciaDao {
 
     private void reescreverArquivo(List<Medicamento> medicamentos) throws IOException {
         StringBuilder builder = new StringBuilder();
-        for (Medicamento medicamentoBuilder: medicamentos) {
+        for (Medicamento medicamentoBuilder : medicamentos) {
             builder.append(format(medicamentoBuilder));
         }
         write(builder.toString(), StandardOpenOption.CREATE);
@@ -107,8 +110,8 @@ public class EmergenciaDaoImpl implements EmergenciaDao {
     public void removerItemArquivo(String identificador) throws IOException {
         List<Medicamento> medicamentos = getAll();
         List<Medicamento> medicamentoResultante = new ArrayList<>();
-        for (Medicamento medicamento : medicamentos){
-            if(!medicamento.getIdentificador().equals(identificador)){
+        for (Medicamento medicamento : medicamentos) {
+            if (!medicamento.getIdentificador().equals(identificador)) {
                 medicamentoResultante.add(medicamento);
             }
         }
@@ -117,19 +120,20 @@ public class EmergenciaDaoImpl implements EmergenciaDao {
     }
 
     private String format(Medicamento medicamento) {
-        return String.format("%s;%s;%s;%d;%d;%s;%s\r\n",
+        return String.format("%s;%s;%s;%d;%d;%s;%s;%s\r\n",
                 medicamento.getIdentificador(),
                 medicamento.getPrincipioAtivo(),
                 medicamento.getFabricante(),
                 medicamento.getDosagem(),
                 medicamento.getPeriodicidade(),
                 medicamento.getPaciente().getNome(),
-                medicamento.getPaciente().getCpf());
+                medicamento.getPaciente().getCpf(),
+                medicamento.getHorarioDose());
     }
 
     private Medicamento convert(String linha) {
         StringTokenizer token = new StringTokenizer(linha, ";");
-        return Medicamento.builder()
+        Medicamento medicamento = Medicamento.builder()
                 .identificador(token.nextToken())
                 .principioAtivo(token.nextToken())
                 .fabricante(token.nextToken())
@@ -140,6 +144,24 @@ public class EmergenciaDaoImpl implements EmergenciaDao {
                         .cpf(token.nextToken())
                         .build())
                 .build();
+        String data = token.nextToken();
+        return dateAndHourFormat(medicamento, data);
+    }
+
+    private Medicamento dateAndHourFormat(Medicamento medicamento, String data) {
+        if (data.equals("null")) {
+            LocalDateTime horarioDose = LocalDateTime.now();
+            medicamento.setHorarioDose(horarioDose);
+            return medicamento;
+        }
+        LocalDateTime horarioDose = LocalDateTime.parse(data);
+        if (LocalDateTime.now().isAfter(horarioDose)) {
+            LocalDateTime proximaDose = horarioDose.plusHours(medicamento.getPeriodicidade());
+            medicamento.setHorarioDose(proximaDose);
+        } else {
+            medicamento.setHorarioDose(horarioDose);
+        }
+        return medicamento;
     }
 
     public void eraseContent() throws IOException {

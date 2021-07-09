@@ -11,9 +11,7 @@ public interface EmergenciaDao {
 
     Medicamento inserirArquivo(Medicamento medicamento) throws IOException;
     List<Medicamento> getAll() throws IOException;
-
     List<Medicamento> findByCpf(String cpf) throws IOException;
-
     Optional<Medicamento> findByName(String principioAtivo) throws IOException;
     Optional<Medicamento> findFirstByCpf(String cpf) throws IOException;
     List<Medicamento> findByPrincipioAtivo(String principioAtivo) throws IOException;

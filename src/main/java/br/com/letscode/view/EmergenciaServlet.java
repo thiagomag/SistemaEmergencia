@@ -20,7 +20,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 @WebServlet(name = "EmergenciaServlet", urlPatterns = "/emergencia")
 public class EmergenciaServlet extends HttpServlet {
