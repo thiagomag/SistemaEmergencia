@@ -40,7 +40,7 @@ public class MedicamentoServiceImpl implements MedicamentoService {
     }
 
     @Override
-    public void remover(String identificador) throws IOException {
-        emergenciaDao.removerItemArquivo(identificador);
+    public Medicamento remover(String identificador) throws IOException {
+        return emergenciaDao.removerItemArquivo(identificador);
     }
 }

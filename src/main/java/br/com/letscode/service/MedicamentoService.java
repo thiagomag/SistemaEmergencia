@@ -11,5 +11,5 @@ public interface MedicamentoService {
     List<Medicamento> consultaMedicamento(String principioAtivo) throws IOException;
     List<Medicamento> listAll() throws IOException;
     Medicamento alterar(Medicamento medicamento, String identificador) throws IOException;
-    void remover(String identificador) throws IOException;
+    Medicamento remover(String identificador) throws IOException;
 }

@@ -1,7 +1,6 @@
 package br.com.letscode.dao;
 
 import br.com.letscode.dominio.Medicamento;
-import br.com.letscode.dominio.Paciente;
 
 import java.io.IOException;
 import java.util.List;
@@ -16,5 +15,5 @@ public interface EmergenciaDao {
     Optional<Medicamento> findFirstByCpf(String cpf) throws IOException;
     List<Medicamento> findByPrincipioAtivo(String principioAtivo) throws IOException;
     Medicamento alterarArquivo(Medicamento medicamento, String identificador) throws IOException;
-    void removerItemArquivo(String identificador) throws IOException;
+    Medicamento removerItemArquivo(String identificador) throws IOException;
 }

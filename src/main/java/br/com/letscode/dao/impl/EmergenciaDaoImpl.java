@@ -7,7 +7,9 @@ import jakarta.annotation.PostConstruct;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -23,16 +25,18 @@ import java.util.stream.Collectors;
 
 public class EmergenciaDaoImpl implements EmergenciaDao {
 
+    private final String caminho = "/arquivosLogicos"+ File.separator+"medicamentos.csv";
+
     private Path path;
 
     @PostConstruct
     public void init() {
         try {
-            path = Paths.get("C:\\Users\\thiag\\IdeaProjects\\SistemaEmergencia\\medicamentos.csv");
+            path = Paths.get(Objects.requireNonNull(getClass().getResource(caminho)).toURI());
             if (!path.toFile().exists()) {
                 Files.createFile(path);
             }
-        } catch (IOException ioException) {
+        } catch (IOException | URISyntaxException ioException) {
             ioException.printStackTrace();
         }
     }
@@ -107,16 +111,20 @@ public class EmergenciaDaoImpl implements EmergenciaDao {
     }
 
     @Override
-    public void removerItemArquivo(String identificador) throws IOException {
+    public Medicamento removerItemArquivo(String identificador) throws IOException {
         List<Medicamento> medicamentos = getAll();
         List<Medicamento> medicamentoResultante = new ArrayList<>();
+        Medicamento medicamentoExcluido = null;
         for (Medicamento medicamento : medicamentos) {
             if (!medicamento.getIdentificador().equals(identificador)) {
                 medicamentoResultante.add(medicamento);
+            } else {
+                medicamentoExcluido = medicamento;
             }
         }
         eraseContent();
         reescreverArquivo(medicamentoResultante);
+        return medicamentoExcluido;
     }
 
     private String format(Medicamento medicamento) {
@@ -144,19 +152,19 @@ public class EmergenciaDaoImpl implements EmergenciaDao {
                         .cpf(token.nextToken())
                         .build())
                 .build();
-        String data = token.nextToken();
+        var data = token.nextToken();
         return dateAndHourFormat(medicamento, data);
     }
 
     private Medicamento dateAndHourFormat(Medicamento medicamento, String data) {
         if (data.equals("null")) {
-            LocalDateTime horarioDose = LocalDateTime.now();
+            var horarioDose = LocalDateTime.now();
             medicamento.setHorarioDose(horarioDose);
             return medicamento;
         }
-        LocalDateTime horarioDose = LocalDateTime.parse(data);
+        var horarioDose = LocalDateTime.parse(data);
         if (LocalDateTime.now().isAfter(horarioDose)) {
-            LocalDateTime proximaDose = horarioDose.plusHours(medicamento.getPeriodicidade());
+            var proximaDose = horarioDose.plusHours(medicamento.getPeriodicidade());
             medicamento.setHorarioDose(proximaDose);
         } else {
             medicamento.setHorarioDose(horarioDose);

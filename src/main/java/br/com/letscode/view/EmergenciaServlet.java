@@ -3,6 +3,7 @@ package br.com.letscode.view;
 import br.com.letscode.dominio.CustomMessage;
 import br.com.letscode.dominio.Medicamento;
 import br.com.letscode.excecoes.PacienteJaExisteException;
+import br.com.letscode.excecoes.PacienteNaoEncontradoExcpetion;
 import br.com.letscode.service.MedicamentoService;
 import br.com.letscode.service.PacienteService;
 import com.google.gson.Gson;
@@ -96,11 +97,12 @@ public class EmergenciaServlet extends HttpServlet {
         }
         PrintWriter printWriter = prepareResponse(response);
         if (cpfPesquisa != null) {
-            List<Medicamento> optionalPaciente = pacienteService.consultaPaciente(cpfPesquisa);
-            if (optionalPaciente != null) {
+            try {
+                List<Medicamento> optionalPaciente = pacienteService.consultaPaciente(cpfPesquisa);
                 printWriter.write(gson.toJson(optionalPaciente));
-            } else {
-                naoEncontradoMessage(response, printWriter);
+            } catch (PacienteNaoEncontradoExcpetion pacienteNaoEncontradoExcpetion) {
+                response.setStatus(400);
+                printWriter.write(gson.toJson(new CustomMessage(400, pacienteNaoEncontradoExcpetion.getMessage())));
             }
         } else if (nomePesquisa != null) {
             List<Medicamento> medicamentosPesquisados = medicamentoService.consultaMedicamento(nomePesquisa);
@@ -147,11 +149,12 @@ public class EmergenciaServlet extends HttpServlet {
         String identificador = request.getParameter("identificador");
         PrintWriter printWriter = prepareResponse(response);
         String resposta;
-        if(Objects.isNull(identificador)){
+        if (Objects.isNull(identificador)) {
             resposta = erroMessage(response);
-        }else {
-            medicamentoService.remover(identificador);
-            resposta = gson.toJson(new CustomMessage(204, "cliente removido"));
+        } else {
+            Medicamento medicamentoExcluido = medicamentoService.remover(identificador);
+            resposta = gson.toJson(new CustomMessage(204, "Medicamento " + medicamentoExcluido.getPrincipioAtivo() +
+                    " do cliente " + medicamentoExcluido.getPaciente().getNome() + " removido com sucesso"));
             request.getSession().setAttribute(MEDICAMENTOS_SESSION, medicamentoService.listAll());
         }
         printWriter.write(resposta);
