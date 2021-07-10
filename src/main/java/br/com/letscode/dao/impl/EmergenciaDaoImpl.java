@@ -165,13 +165,6 @@ public class EmergenciaDaoImpl implements EmergenciaDao {
             horarioDose = horarioDose.plusDays(dias).plusHours((long) (horas+resultado));
             medicamento.setHorarioDose(horarioDose);
         }
-//        if (LocalDateTime.now().isAfter(horarioDose)) {
-//            horarioDose.minusDays(Long.parseLong(String.valueOf(LocalDateTime.now())));
-//            var proximaDose = horarioDose.plusHours(medicamento.getPeriodicidade());
-//            medicamento.setHorarioDose(proximaDose);
-//        } else {
-//            medicamento.setHorarioDose(horarioDose);
-//        }
         return medicamento;
     }
 
