@@ -21,7 +21,8 @@ public class EmergenciaDaoImpl implements EmergenciaDao {
 
     private Path path;
 
-    public EmergenciaDaoImpl() {
+    @PostConstruct
+    public void init() {
         try {
             path = Paths.get("C:\\Users\\Thiago\\Documents\\medicamentos.csv");
             if (!path.toFile().exists()) {
