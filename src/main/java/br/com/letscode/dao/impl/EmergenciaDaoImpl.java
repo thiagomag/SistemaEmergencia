@@ -7,19 +7,13 @@ import jakarta.annotation.PostConstruct;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.StringTokenizer;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -27,10 +21,9 @@ public class EmergenciaDaoImpl implements EmergenciaDao {
 
     private Path path;
 
-    @PostConstruct
-    public void init() {
+    public EmergenciaDaoImpl() {
         try {
-            path = Paths.get("C:\\Users\\thiag\\IdeaProjects\\medicamentos.csv");
+            path = Paths.get("C:\\Users\\Thiago\\Documents\\medicamentos.csv");
             if (!path.toFile().exists()) {
                 Files.createFile(path);
             }
@@ -161,12 +154,23 @@ public class EmergenciaDaoImpl implements EmergenciaDao {
             return medicamento;
         }
         var horarioDose = LocalDateTime.parse(data);
-        if (LocalDateTime.now().isAfter(horarioDose)) {
-            var proximaDose = horarioDose.plusHours(medicamento.getPeriodicidade());
-            medicamento.setHorarioDose(proximaDose);
-        } else {
+        var dias = LocalDateTime.now().getDayOfMonth() - horarioDose.getDayOfMonth();
+        var horas = LocalDateTime.now().getHour() - horarioDose.getHour();
+        if(medicamento.getPeriodicidade() == 24) {
+            horarioDose = horarioDose.plusDays(dias+1);
+        } else if (horas > medicamento.getPeriodicidade()) {
+            var resultado = medicamento.getPeriodicidade() - ((((double) horas/(double) medicamento.getPeriodicidade()) - ((int) (horas/medicamento.getPeriodicidade()))) * medicamento.getPeriodicidade());
+            System.out.println(resultado);
+            horarioDose = horarioDose.plusDays(dias).plusHours((long) (horas+resultado));
             medicamento.setHorarioDose(horarioDose);
         }
+//        if (LocalDateTime.now().isAfter(horarioDose)) {
+//            horarioDose.minusDays(Long.parseLong(String.valueOf(LocalDateTime.now())));
+//            var proximaDose = horarioDose.plusHours(medicamento.getPeriodicidade());
+//            medicamento.setHorarioDose(proximaDose);
+//        } else {
+//            medicamento.setHorarioDose(horarioDose);
+//        }
         return medicamento;
     }
 
